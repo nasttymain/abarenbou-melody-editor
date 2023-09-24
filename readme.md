@@ -22,13 +22,13 @@
 がインストールされていることが必要だYO-oooooooooo AAAAE-A-A-I-A-U- JO-oooooooooooo AAE-O-A-A-U-U-A- E-eee-ee-eee AAAAE-A-E-I-E-A- JO-ooo-oo-oo-oo EEEEO-A-AAA-AAAA 
 
 ## つかいかた
-`S` を押せば保存
-`O` を押せば開く...としたいところだがまだ
-`W` `S`で音符長さを調整
-`R` `F`でクオンタイズを調整
-`MOUSE_LEFT` で音符を配置
-`MOUSE_RIGHT` で音符を消去
-`LEFT` `RIGHT` `UP` `DOWN` で移動
+* `S` を押せば保存
+* `O` を押せば開く...としたいところだがまだ
+* `W` `S`で音符長さを調整
+* `R` `F`でクオンタイズを調整
+* `MOUSE_LEFT` で音符を配置
+* `MOUSE_RIGHT` で音符を消去
+* `LEFT` `RIGHT` `UP` `DOWN` で移動
 
 # SUPER IMPORTANT THING YOU MUST KNOW !!!!!1
 ## Requirements
