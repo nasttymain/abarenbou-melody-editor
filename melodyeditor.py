@@ -110,6 +110,11 @@ def main():
                 elif event.scancode == 60:
                     #F3 - SAVE
                     export_melody(songname, songdata)
+                elif event.scancode == 59:
+                    #F2 - OPEN
+                    istat, idata = import_melody(songname)
+                    if istat == 0:
+                        songdata = idata
             draw_pianoroll(surf, piano_bottomtone, piano_xpos, editorsettings, songdata)
             draw_uipanel(surf, piano_xpos, editorsettings)
         pygame.display.flip()
@@ -250,8 +255,75 @@ def export_melody(filename, song):
                 f.write(exportdata)
     print(exportdata)
 
-
-
+def import_melody(filename):
+    importstat = -1
+    fn = tkinter.filedialog.askopenfilename(filetypes=[("melody", "txt")])
+    rawmelody = ""
+    if fn != "":
+        importstat = 0
+        with open(fn, mode="r") as f:
+            rawmelody = f.read()
+    importdata = {
+        "format": 0,
+        "resolution": 48,
+        "track":[]
+    }
+    i = 0
+    time = 0
+    tempo = 120
+    length = 48
+    octave = 0
+    tonechars = "ABCDEFG"
+    toneheights = [-3, -1, 0, 2, 4, 5, 7]
+    while(i < len(rawmelody)):
+        if rawmelody[i].isspace():
+            i += 1
+            continue
+        elif rawmelody[i] == 'i':
+            importdata["track"].append({"position": time, "category": "property", "length": 0, "type": "initialize"})
+            tempo = 120
+            length = 48
+            octave = 0
+            i += 1
+        elif rawmelody[i] == 'T':
+            i += 1
+            v = 0
+            while(rawmelody[i].isdigit()):
+                v = v * 10 + int(rawmelody[i])
+                i += 1
+            importdata["track"].append({"position": time, "category": "property", "length": 0, "type": "tempo", "value": v})
+        elif rawmelody[i] == 'L':
+            i += 1
+            v = 0
+            while(rawmelody[i].isdigit()):
+                v = v * 10 + int(rawmelody[i])
+                i += 1
+            length = v
+        elif rawmelody[i] == '^':
+            octave += 1
+            i += 1
+        elif rawmelody[i] == 'v':
+            octave -= 1
+            i += 1
+        elif rawmelody[i] in tonechars:
+            th = toneheights[tonechars.find(rawmelody[i])] + (octave + 4) * 12
+            i += 1
+            if rawmelody[i] == '#':
+                th += 1
+                i += 1
+            elif rawmelody[i] == 'b':
+                th -= 1
+                i += 1
+            importdata["track"].append({"position": time, "category": "tone", "length": length, "height": th})
+            time += length
+        elif rawmelody[i] == 'R':
+            i += 1
+            time += length
+        else:
+            i += 1
+    
+    print(importdata)
+    return importstat, importdata
 
 if __name__ == "__main__":
     main()
