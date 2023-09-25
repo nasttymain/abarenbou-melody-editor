@@ -275,6 +275,7 @@ def import_melody(filename):
     octave = 0
     tonechars = "ABCDEFG"
     toneheights = [-3, -1, 0, 2, 4, 5, 7]
+    lasttonetype = "Rest"
     while(i < len(rawmelody)):
         if rawmelody[i].isspace():
             i += 1
@@ -306,6 +307,7 @@ def import_melody(filename):
             octave -= 1
             i += 1
         elif rawmelody[i] in tonechars:
+            lasttonetype = "Tone"
             th = toneheights[tonechars.find(rawmelody[i])] + (octave + 4) * 12
             i += 1
             if rawmelody[i] == '#':
@@ -317,8 +319,26 @@ def import_melody(filename):
             importdata["track"].append({"position": time, "category": "tone", "length": length, "height": th})
             time += length
         elif rawmelody[i] == 'R':
+            lasttonetype = "Rest"
             i += 1
             time += length
+        elif rawmelody[i] == '-':
+            print(lasttonetype)
+            if lasttonetype == "Rest":
+                time += length
+                i += 1
+            elif lasttonetype == "Tone":
+                hi = -1
+                while(importdata["track"][hi]["category"] != "tone"):
+                    hi -= 1
+                    if -hi >= len(importdata["track"]):
+                        hi = None
+                        break
+                print(hi)
+                if hi != None:
+                    importdata["track"][hi]["length"] += length
+                i += 1
+                time += length
         else:
             i += 1
     
