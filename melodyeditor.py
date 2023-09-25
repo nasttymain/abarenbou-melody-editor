@@ -185,6 +185,8 @@ def draw_pianoroll(surface, bottomtone, rollposx, editorsettings, song):
             pianocolor[pianokeytype[(bottomtone + ycnt) % 12]], 
             (0, surface.get_height() - toneheight * (ycnt + 2), pianowidth, toneheight)
         )
+        if (bottomtone + ycnt) % 12 == 0:
+            surface.blit(pygame.font.SysFont("monospace", 20).render("C" + str((bottomtone + ycnt) // 12), False, (0, 0, 0)), (0, surface.get_height() - toneheight * (ycnt + 2)) )
         pygame.draw.line(
             surface,
             (0, 0, 0),
