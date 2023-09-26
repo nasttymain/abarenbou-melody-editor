@@ -22,7 +22,7 @@ def main():
     piano_bottomtone = 48
     piano_xpos = 0
     editorsettings = {
-        "toneheight": 24,
+        "toneheight": 20,
         "pianowidth": 48,
         "tonewidth": 160,
         "current_length": 24,
@@ -30,7 +30,7 @@ def main():
     }
 
     draw_pianoroll(surf, piano_bottomtone, piano_xpos, editorsettings, songdata)
-    draw_uipanel(surf, piano_xpos, editorsettings)
+    draw_uipanel(surf, piano_xpos, editorsettings, songdata)
 
     pushedkeys = []
 
@@ -136,7 +136,7 @@ def main():
                         del(pushedkeys[foundk])
             
             draw_pianoroll(surf, piano_bottomtone, piano_xpos, editorsettings, songdata)
-            draw_uipanel(surf, piano_xpos, editorsettings)
+            draw_uipanel(surf, piano_xpos, editorsettings, songdata)
         if pushedkeys != []:
             rd = 0
             for k in pushedkeys:
@@ -153,7 +153,7 @@ def main():
                 k["pushdowntime"] += 1
             if rd == 1:
                 draw_pianoroll(surf, piano_bottomtone, piano_xpos, editorsettings, songdata)
-                draw_uipanel(surf, piano_xpos, editorsettings)
+                draw_uipanel(surf, piano_xpos, editorsettings, songdata)
 
         pygame.display.flip()
         frameclock.tick(30)
@@ -161,7 +161,7 @@ def main():
 
 #        surface.fill((255, 0, 0), (0, 0, surface.get_width() // 2, surface.get_height()))
 
-def draw_uipanel(surface, rollposx, editorsettings):
+def draw_uipanel(surface, rollposx, editorsettings, song):
     toneheight = editorsettings["toneheight"]
     pianowidth = editorsettings["pianowidth"]
     tonewidth = editorsettings["tonewidth"]
@@ -170,6 +170,17 @@ def draw_uipanel(surface, rollposx, editorsettings):
     pygame.draw.rect(surface, (192, 192, 192), (0, 0, surface.get_width(), toneheight * 2))
     surface.blit(pygame.font.SysFont("monospace", 20).render("Quantize " + str(editorsettings["current_quantize"]), False, (0, 0, 0)), (0, 0))
     surface.blit(pygame.font.SysFont("monospace", 20).render("Length " + str(editorsettings["current_length"]), False, (0, 0, 0)), (160, 0))
+    rollposxend = (surface.get_width() - pianowidth) / tonewidth + rollposx
+    for t in song["track"]:
+        if t["category"] == "property":
+            if (rollposx <= (t["position"]) / song["resolution"] <= rollposxend):
+                surface.blit(
+                    pygame.font.SysFont("monospace", 20).render( (t["type"][0] + str(t["value"]) if "value" in t else t["type"][0]), False, (0, 0, 0)),
+                    (
+                        (float(t["position"]) / song["resolution"] - rollposx) * tonewidth + pianowidth,
+                        toneheight
+                    )
+                )
 
     #bottom
     pygame.draw.rect(surface, (192, 192, 192), (0, surface.get_height() - toneheight, surface.get_width(), toneheight))
@@ -177,7 +188,7 @@ def draw_uipanel(surface, rollposx, editorsettings):
     markerx = int(rollposx)
     while markposx <= surface.get_width():
         surface.blit(pygame.font.SysFont("monospace", 20).render(str(markerx), False, (0, 0, 0)), (markposx, surface.get_height() - toneheight))
-        pygame.draw.line(surface, (0, 0, 0), (markposx, 0), (markposx, surface.get_height() - toneheight))
+        pygame.draw.line(surface, (0, 0, 0), (markposx, toneheight * 2), (markposx, surface.get_height() - toneheight))
         markerx += 1
         markposx += tonewidth
 
@@ -233,15 +244,16 @@ def draw_pianoroll(surface, bottomtone, rollposx, editorsettings, song):
         pygame.draw.line(
             surface,
             (128, 128, 128),
-            (0, surface.get_height() - toneheight * (ycnt + 1)),
+            (0                  , surface.get_height() - toneheight * (ycnt + 1)),
             (surface.get_width(), surface.get_height() - toneheight * (ycnt + 1)),
             1 if ((bottomtone + ycnt) % 12 != 0) else 2
         )
     pygame.draw.line(
         surface,
         (128, 128, 128),
-        (pianowidth, 0),
-        (pianowidth, surface.get_height())
+        (pianowidth, toneheight * 2),
+        (pianowidth, surface.get_height()),
+        2
     )
     #events
     pygame.draw.rect(surface, (192, 192, 192), (0, toneheight, surface.get_width(), toneheight))
