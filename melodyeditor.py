@@ -2,14 +2,15 @@ import pygame
 from pygame.locals import *
 import pygame.time
 import tkinter.filedialog
+import tkinter.messagebox
 
 def main():
     pygame.init()
     surf = pygame.display.set_mode((800,500), pygame.DOUBLEBUF)
-    pygame.display.set_caption("Abarenbou Melody")
     surf.fill(color=(255, 255, 255))
 
     songname = "Untitled"
+    pygame.display.set_caption("Abarenbou Melody - " + songname)
     songdata = {
         "format": 0,
         "resolution": 48,
@@ -118,12 +119,17 @@ def main():
                     editorsettings["current_quantize"] //= 2
                 elif keycode == 60:
                     #F3 - SAVE
-                    export_melody(songname, songdata)
+                    sn = export_melody(songname, songdata)
+                    if sn != "":
+                        songname = sn
+                        pygame.display.set_caption("Abarenbou Melody - " + songname)
                 elif keycode == 59:
                     #F2 - OPEN
-                    istat, idata = import_melody(songname)
+                    istat, idata, sn = import_melody(songname)
                     if istat == 0:
                         songdata = idata
+                        songname = sn
+                        pygame.display.set_caption("Abarenbou Melody - " + songname)
             elif event.type == KEYUP:
                 keycode = event.scancode
                 if 79 <= keycode <= 82:
@@ -304,13 +310,16 @@ def export_melody(filename, song):
             elif t["type"] == "tempo":
                 exportdata += "T" + str(t["value"]) + " "
     if errorcode != 0:
+        tkinter.messagebox.showerror("Abarenbou Melody", "Export failed with code " + str(errorcode))
         print("E: export failed with code ", errorcode)
         print(exportdata)
+        fn = ""
     else:
         fn = tkinter.filedialog.asksaveasfilename(filetypes=[("melody", "txt")])
         if fn != "":
             with open(fn, mode="w") as f:
                 f.write(exportdata)
+    return fn
 
 def import_melody(filename):
     importstat = -1
@@ -400,7 +409,7 @@ def import_melody(filename):
             i += 1
     
     #print(importdata)
-    return importstat, importdata
+    return importstat, importdata, fn
 
 if __name__ == "__main__":
     main()
