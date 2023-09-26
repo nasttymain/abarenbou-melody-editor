@@ -23,7 +23,7 @@ def main():
     piano_xpos = 0
     editorsettings = {
         "toneheight": 24,
-        "pianowidth": 32,
+        "pianowidth": 48,
         "tonewidth": 160,
         "current_length": 24,
         "current_quantize": 12
@@ -31,6 +31,8 @@ def main():
 
     draw_pianoroll(surf, piano_bottomtone, piano_xpos, editorsettings, songdata)
     draw_uipanel(surf, piano_xpos, editorsettings)
+
+    pushedkeys = []
 
     game_close = 0
     tstamp = 0
@@ -84,41 +86,75 @@ def main():
                     if deletetone != None:
                         del songdata["track"][deletetone]
             elif event.type == KEYDOWN:
-                print("KEYDOWN", event)
-                if event.scancode == 79:
+#                print("KEYDOWN", event)
+                keycode = event.scancode
+                if keycode == 79:
                     #RIGHT
-                    piano_xpos = piano_xpos + 0.5
-                elif event.scancode == 80:
+#                    piano_xpos = piano_xpos + 0.5
+                    pushedkeys.append({"key": 79, "pushdowntime": 0})
+                elif keycode == 80:
                     #LEFT
-                    piano_xpos = max(0.0, piano_xpos - 0.5)
-                elif event.scancode == 81:
+#                    piano_xpos = max(0.0, piano_xpos - 0.5)
+                    pushedkeys.append({"key": 80, "pushdowntime": 0})
+                elif keycode == 81:
                     #DOWN
-                    piano_bottomtone = max(piano_bottomtone - 1, 0)
-                elif event.scancode == 82:
+#                    piano_bottomtone = max(piano_bottomtone - 1, 0)
+                    pushedkeys.append({"key": 81, "pushdowntime": 0})
+                elif keycode == 82:
                     #UP
-                    piano_bottomtone = min(piano_bottomtone + 1, 127)
-                elif event.scancode == 26:
+#                    piano_bottomtone = min(piano_bottomtone + 1, 127)
+                    pushedkeys.append({"key": 82, "pushdowntime": 0})
+                elif keycode == 26:
                     #W
                     editorsettings["current_length"] *= 2
-                elif event.scancode == 22:
+                elif keycode == 22:
                     #S
                     editorsettings["current_length"] //= 2
-                elif event.scancode == 21:
+                elif keycode == 21:
                     #R
                     editorsettings["current_quantize"] *= 2
-                elif event.scancode == 9:
+                elif keycode == 9:
                     #F
                     editorsettings["current_quantize"] //= 2
-                elif event.scancode == 60:
+                elif keycode == 60:
                     #F3 - SAVE
                     export_melody(songname, songdata)
-                elif event.scancode == 59:
+                elif keycode == 59:
                     #F2 - OPEN
                     istat, idata = import_melody(songname)
                     if istat == 0:
                         songdata = idata
+            elif event.type == KEYUP:
+                keycode = event.scancode
+                if 79 <= keycode <= 82:
+                    foundk = None
+                    for fcnt, fk in enumerate(pushedkeys):
+                        if fk["key"] == keycode:
+                            foundk = fcnt
+                            break
+                    if foundk != None:
+                        del(pushedkeys[foundk])
+            
             draw_pianoroll(surf, piano_bottomtone, piano_xpos, editorsettings, songdata)
             draw_uipanel(surf, piano_xpos, editorsettings)
+        if pushedkeys != []:
+            rd = 0
+            for k in pushedkeys:
+                if k["pushdowntime"] == 0 or k["pushdowntime"] >= 15:
+                    rd = 1
+                    if k["key"] == 79:
+                        piano_xpos = piano_xpos + 0.5
+                    elif k["key"] == 80:
+                        piano_xpos = max(0.0, piano_xpos - 0.5)
+                    elif k["key"] == 81:
+                        piano_bottomtone = max(piano_bottomtone - 1, 0)
+                    elif k["key"] == 82:
+                        piano_bottomtone = min(piano_bottomtone + 1, 127)
+                k["pushdowntime"] += 1
+            if rd == 1:
+                draw_pianoroll(surf, piano_bottomtone, piano_xpos, editorsettings, songdata)
+                draw_uipanel(surf, piano_xpos, editorsettings)
+
         pygame.display.flip()
         frameclock.tick(30)
     pygame.quit()
@@ -131,7 +167,7 @@ def draw_uipanel(surface, rollposx, editorsettings):
     tonewidth = editorsettings["tonewidth"]
 
     #top
-    pygame.draw.rect(surface, (192, 192, 192), (0, 0, surface.get_width(), toneheight))
+    pygame.draw.rect(surface, (192, 192, 192), (0, 0, surface.get_width(), toneheight * 2))
     surface.blit(pygame.font.SysFont("monospace", 20).render("Quantize " + str(editorsettings["current_quantize"]), False, (0, 0, 0)), (0, 0))
     surface.blit(pygame.font.SysFont("monospace", 20).render("Length " + str(editorsettings["current_length"]), False, (0, 0, 0)), (160, 0))
 
@@ -185,20 +221,25 @@ def draw_pianoroll(surface, bottomtone, rollposx, editorsettings, song):
         pygame.draw.rect(
             surface,
             pianocolor[pianokeytype[(bottomtone + ycnt) % 12]], 
-            (0, surface.get_height() - toneheight * (ycnt + 2), pianowidth, toneheight)
+            (0, surface.get_height() - toneheight * (ycnt + 2), pianowidth * 2 / 3, toneheight)
+        )
+        pygame.draw.rect(
+            surface,
+            pianocolor[0], 
+            (pianowidth * 2 / 3, surface.get_height() - toneheight * (ycnt + 2), pianowidth * 1 / 3, toneheight)
         )
         if (bottomtone + ycnt) % 12 == 0:
             surface.blit(pygame.font.SysFont("monospace", 20).render("C" + str((bottomtone + ycnt) // 12), False, (0, 0, 0)), (0, surface.get_height() - toneheight * (ycnt + 2)) )
         pygame.draw.line(
             surface,
-            (0, 0, 0),
+            (128, 128, 128),
             (0, surface.get_height() - toneheight * (ycnt + 1)),
             (surface.get_width(), surface.get_height() - toneheight * (ycnt + 1)),
             1 if ((bottomtone + ycnt) % 12 != 0) else 2
         )
     pygame.draw.line(
         surface,
-        (0, 0, 0),
+        (128, 128, 128),
         (pianowidth, 0),
         (pianowidth, surface.get_height())
     )
@@ -252,12 +293,12 @@ def export_melody(filename, song):
                 exportdata += "T" + str(t["value"]) + " "
     if errorcode != 0:
         print("E: export failed with code ", errorcode)
+        print(exportdata)
     else:
         fn = tkinter.filedialog.asksaveasfilename(filetypes=[("melody", "txt")])
         if fn != "":
             with open(fn, mode="w") as f:
                 f.write(exportdata)
-    print(exportdata)
 
 def import_melody(filename):
     importstat = -1
@@ -327,7 +368,7 @@ def import_melody(filename):
             i += 1
             time += length
         elif rawmelody[i] == '-':
-            print(lasttonetype)
+            #print(lasttonetype)
             if lasttonetype == "Rest":
                 time += length
                 i += 1
@@ -338,7 +379,7 @@ def import_melody(filename):
                     if -hi >= len(importdata["track"]):
                         hi = None
                         break
-                print(hi)
+                #print(hi)
                 if hi != None:
                     importdata["track"][hi]["length"] += length
                 i += 1
@@ -346,7 +387,7 @@ def import_melody(filename):
         else:
             i += 1
     
-    print(importdata)
+    #print(importdata)
     return importstat, importdata
 
 if __name__ == "__main__":
