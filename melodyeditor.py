@@ -97,15 +97,17 @@ def main():
                 elif event.scancode == 82:
                     #UP
                     piano_bottomtone = min(piano_bottomtone + 1, 127)
-                elif event.unicode == 'w':
+                elif event.scancode == 26:
                     #W
                     editorsettings["current_length"] *= 2
-                elif event.unicode == 's':
+                elif event.scancode == 22:
                     #S
                     editorsettings["current_length"] //= 2
-                elif event.unicode == "r":
+                elif event.scancode == 21:
+                    #R
                     editorsettings["current_quantize"] *= 2
-                elif event.unicode == "f":
+                elif event.scancode == 9:
+                    #F
                     editorsettings["current_quantize"] //= 2
                 elif event.scancode == 60:
                     #F3 - SAVE

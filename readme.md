@@ -22,8 +22,8 @@
 がインストールされていることが必要だYO-oooooooooo AAAAE-A-A-I-A-U- JO-oooooooooooo AAE-O-A-A-U-U-A- E-eee-ee-eee AAAAE-A-E-I-E-A- JO-ooo-oo-oo-oo EEEEO-A-AAA-AAAA 
 
 ## つかいかた
-* `S` を押せば保存
-* `O` を押せば開く...としたいところだがまだ
+* `F3` を押せば保存
+* `F2` を押せば開く
 * `W` `S`で音符長さを調整
 * `R` `F`でクオンタイズを調整
 * `MOUSE_LEFT` で音符を配置
