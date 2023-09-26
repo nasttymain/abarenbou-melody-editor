@@ -3,6 +3,7 @@ from pygame.locals import *
 import pygame.time
 import tkinter.filedialog
 import tkinter.messagebox
+import tkinter.simpledialog
 
 def main():
     pygame.init()
@@ -41,12 +42,63 @@ def main():
     while game_close == 0:
         for event in pygame.event.get():
             if event.type == KEYDOWN and event.key == K_ESCAPE:
-                game_close = 1
+                pass
             elif event.type == QUIT:
                 game_close = 1
             elif event.type == MOUSEBUTTONDOWN:
-                if event.button == 1:
+                if editorsettings["pianowidth"] <= event.pos[0] and editorsettings["toneheight"] * 1 <= event.pos[1] < editorsettings["toneheight"] * 2:
+                    mtime = int(((event.pos[0] - editorsettings["pianowidth"]) / editorsettings["tonewidth"] + piano_xpos) * songdata["resolution"] // editorsettings["current_quantize"] * editorsettings["current_quantize"])
+                    tfound = None
+                    tdelete = None
+                    for tcnt, t in enumerate(songdata["track"]):
+                        if t["category"] == "property":
+                            if t["position"] == mtime:
+                                tfound = tcnt
+                                if event.button == 3:
+                                    tdelete = tfound
+                                elif event.button == 1:
+                                    if t["type"] == "initialize":
+                                        pass
+                                    elif t["type"] == "tempo":
+                                        #tempoを左クリック
+                                        tm = tkinter.simpledialog.askinteger("Abarenbou Melody", "New Tempo(BPM):", initialvalue=t["value"], minvalue=1)
+                                        if tm != None:
+                                            songdata["track"][tcnt]["value"] = tm                                    
+                                    break
+                    if tfound == None:
+                        ttext = ""
+                        while(True):
+                            ttext = tkinter.simpledialog.askstring("Abarenbou Melody", "Property Command:", initialvalue=ttext, show="")
+                            if ttext == None:
+                                ttext = ""
+                            if ttext == None or ttext == "":
+                                break
+                            elif ttext == "i":
+                                songdata["track"].append(
+                                    {
+                                        "position": mtime,
+                                        "category": "property",
+                                        "length": 0,
+                                        "type": "initialize"
+                                    }
+                                )
+                                break
+                            elif ttext[0] == "t" and ttext[1:].isdigit():
+                                songdata["track"].append(
+                                    {
+                                        "position": mtime,
+                                        "category": "property",
+                                        "length": 0,
+                                        "type": "tempo",
+                                        "value": ttext[1:]
+                                    }
+                                )
+                                break
+                    if tdelete != None:
+                        del(songdata["track"][tdelete])
+                elif event.button == 1:
                     if editorsettings["pianowidth"] <= event.pos[0] and editorsettings["toneheight"] * 2 <= event.pos[1] < surf.get_height() - editorsettings["toneheight"]:
+                        # ノート面内
                         print( (event.pos[0] - editorsettings["pianowidth"]) / editorsettings["tonewidth"] + piano_xpos , piano_bottomtone + (surf.get_height() - event.pos[1]) // editorsettings["toneheight"] - 1 )
                         has_dupl = 0
                         for t in songdata["track"]:
@@ -194,7 +246,8 @@ def draw_uipanel(surface, rollposx, editorsettings, song):
     markerx = int(rollposx)
     while markposx <= surface.get_width():
         surface.blit(pygame.font.SysFont("monospace", 20).render(str(markerx), False, (0, 0, 0)), (markposx, surface.get_height() - toneheight))
-        pygame.draw.line(surface, (0, 0, 0), (markposx, toneheight * 2), (markposx, surface.get_height() - toneheight))
+        pygame.draw.line(surface,       (0, 0, 0), (markposx                  , toneheight * 2), (markposx                  , surface.get_height() - toneheight))
+        pygame.draw.line(surface, (192, 192, 192), (markposx + tonewidth * 0.5, toneheight * 2), (markposx + tonewidth * 0.5, surface.get_height() - toneheight))
         markerx += 1
         markposx += tonewidth
 
