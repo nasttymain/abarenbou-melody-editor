@@ -182,6 +182,16 @@ def main():
                         songdata = idata
                         songname = sn
                         pygame.display.set_caption("Abarenbou Melody - " + songname)
+                elif keycode == 32:
+                    #3
+                    if editorsettings["current_length"] % 3 == 0 and editorsettings["current_quantize"] % 3 == 0:
+                        # 3連符化、3割
+                        editorsettings["current_length"] //= 3
+                        editorsettings["current_quantize"] //= 3
+                    elif editorsettings["current_length"] % 3 != 0 and editorsettings["current_quantize"] % 3 != 0:
+                        # もとが3連符。3倍
+                        editorsettings["current_length"] *= 3
+                        editorsettings["current_quantize"] *= 3
             elif event.type == KEYUP:
                 keycode = event.scancode
                 if 79 <= keycode <= 82:
