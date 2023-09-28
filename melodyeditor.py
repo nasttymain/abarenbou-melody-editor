@@ -5,6 +5,10 @@ import tkinter.filedialog
 import tkinter.messagebox
 import tkinter.simpledialog
 
+def siglen2tonelen(length_signature: int):
+    sigdfour = 48
+    return str(length_signature / sigdfour)
+
 def main():
     pygame.init()
     surf = pygame.display.set_mode((800,500), pygame.DOUBLEBUF)
@@ -96,6 +100,21 @@ def main():
                                 break
                     if tdelete != None:
                         del(songdata["track"][tdelete])
+                elif editorsettings["toneheight"] * 0 <= event.pos[1] < editorsettings["toneheight"] * 1:
+                    #Q、Lの設定
+                    if 0 <= event.pos[0] < 240:
+                        # Q
+                        v = tkinter.simpledialog.askinteger("Abarenbou Melody", "New Quantize Length:", initialvalue=editorsettings["current_quantize"])
+                        if v != None:
+                            if v > 0:
+                                editorsettings["current_quantize"] = v
+                    elif 240 <= event.pos[0] < 480:
+                        #L
+                        v = tkinter.simpledialog.askinteger("Abarenbou Melody", "New Length:", initialvalue=editorsettings["current_length"])
+                        if v != None:
+                            if v > 0:
+                                editorsettings["current_length"] = v
+                    pass
                 elif event.button == 1:
                     if editorsettings["pianowidth"] <= event.pos[0] and editorsettings["toneheight"] * 2 <= event.pos[1] < surf.get_height() - editorsettings["toneheight"]:
                         # ノート面内
@@ -236,8 +255,8 @@ def draw_uipanel(surface, rollposx, editorsettings, song):
 
     #top
     pygame.draw.rect(surface, (192, 192, 192), (0, 0, surface.get_width(), toneheight * 2))
-    surface.blit(pygame.font.SysFont("monospace", 20).render("Quantize " + str(editorsettings["current_quantize"]), False, (0, 0, 0)), (0, 0))
-    surface.blit(pygame.font.SysFont("monospace", 20).render("Length " + str(editorsettings["current_length"]), False, (0, 0, 0)), (160, 0))
+    surface.blit(pygame.font.SysFont("monospace", 20).render("Quantize " + str(editorsettings["current_quantize"])+ " (" + siglen2tonelen(editorsettings["current_quantize"]) + ")", False, (0, 0, 0)), (0, 0))
+    surface.blit(pygame.font.SysFont("monospace", 20).render("Length " + str(editorsettings["current_length"]) + " (" + siglen2tonelen(editorsettings["current_length"]) + ")", False, (0, 0, 0)), (240, 0))
     rollposxend = (surface.get_width() - pianowidth) / tonewidth + rollposx
     for t in song["track"]:
         if t["category"] == "property":
